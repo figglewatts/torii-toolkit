@@ -1,0 +1,11 @@
+{
+	"type": "sprite",
+	"texture": "textures/test-9s.png",
+	"ppu": 100.0,
+	"border": {
+		"x": 32,
+		"y": 32,
+		"z": 32,
+		"w": 32
+	}
+}
