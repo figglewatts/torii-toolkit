@@ -14,27 +14,35 @@ namespace Torii.Resource
     {
         private static readonly Dictionary<string, GenericResource> _resources;
         private static readonly Dictionary<Type, IResourceHandler> _handlers;
+        private static readonly ResourceLifespans _lifespans;
+
+        private static readonly string lifespansDataFileName = "resourcelifespans.json";
 
         static ResourceManager()
         {
             _resources = new Dictionary<string, GenericResource>();
             _handlers = new Dictionary<Type, IResourceHandler>();
+            _lifespans = new ResourceLifespans();
         }
 
         public static void Initialize()
         {
             RegisterHandler(new SpriteHandler());
             RegisterHandler(new Texture2DHandler());
+
+            loadLifespans();
         }
 
         // TODO: user configurable resource lifespans?
 
-        public static void ClearLifespan(ResourceLifespan span)
+        public static void ClearLifespan(string span)
         {
+            int spanID = _lifespans[span];
+
             List<string> toRemove = new List<string>();
             foreach (var res in _resources)
             {
-                if (res.Value.Lifespan == span)
+                if (res.Value.Lifespan == spanID)
                 {
                     toRemove.Add(res.Key);
                 }
@@ -46,7 +54,17 @@ namespace Torii.Resource
             }
         }
 
-        public static T Load<T>(string path, ResourceLifespan span = ResourceLifespan.Global)
+        public static T Load<T>(string path)
+        {
+            return Load<T>(path, _lifespans["global"]);
+        }
+
+        public static T Load<T>(string path, string span)
+        {
+            return Load<T>(path, _lifespans[span]);
+        }
+
+        public static T Load<T>(string path, int span)
         {
             Resource<T> res;
             if (checkCache(path, out res)) return res.Data;
@@ -85,6 +103,18 @@ namespace Torii.Resource
             }
             data = null;
             return false;
+        }
+
+        private static void loadLifespans()
+        {
+            string lifespanPath = PathUtil.Combine(Application.streamingAssetsPath,
+                ToriiToolkit.StreamingAssetsDataDirectory, lifespansDataFileName);
+            JSONArray lifespanArray = JSONUtil.ReadJSONFromDisk(lifespanPath).AsArray;
+
+            foreach (JSONString lifespan in lifespanArray)
+            {
+                _lifespans.CreateLifespan(lifespan);
+            }
         }
     }
 }

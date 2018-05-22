@@ -15,7 +15,8 @@ namespace Torii.Util
         /// <returns>JSONNode parsed from the file.</returns>
         public static JSONNode ReadJSONFromDisk(string path)
         {
-            JSONNode json = JSON.Parse(File.ReadAllText(path)).AsObject;
+            string jsonString = File.ReadAllText(path);
+            JSONNode json = JSON.Parse(jsonString);
             return json;
         }
     }

@@ -8,12 +8,12 @@ namespace Torii.Resource
     public class Resource<T> : GenericResource
     {
         public T Data;
-        public Resource(T data, ResourceLifespan lifespan = ResourceLifespan.Global) : base(lifespan)
+        public Resource(T data, int lifespan = 0) : base(lifespan)
         {
             Data = data;
         }
 
-        public Resource(ResourceLifespan lifespan = ResourceLifespan.Global) : base(lifespan)
+        public Resource(int lifespan = 0) : base(lifespan)
         {
             // intentionally empty
         }

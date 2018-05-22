@@ -7,9 +7,9 @@ namespace Torii.Resource
 {
     public abstract class GenericResource
     {
-        public ResourceLifespan Lifespan;
+        public int Lifespan;
 
-        protected GenericResource(ResourceLifespan lifespan)
+        protected GenericResource(int lifespan)
         {
             Lifespan = lifespan;
         }

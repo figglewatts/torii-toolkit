@@ -9,6 +9,6 @@ namespace Torii.Resource
     {
         Type GetResourceType();
 
-        void Load(string path, ResourceLifespan span);
+        void Load(string path, int span);
     }
 }

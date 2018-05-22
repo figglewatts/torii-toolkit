@@ -17,7 +17,7 @@ namespace Torii.Resource.Handlers
             return typeof(Sprite);
         }
 
-        public void Load(string path, ResourceLifespan span)
+        public void Load(string path, int span)
         {
             JSONNode sprite = JSONUtil.ReadJSONFromDisk(path);
             string type = sprite["type"].Value;

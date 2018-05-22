@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Torii.Util;
 using UnityEngine;
 
 namespace Torii.UI
@@ -12,7 +13,7 @@ namespace Torii.UI
         /// <summary>
         /// The path under "StreamingAssets" in which all UI data files (JSON) are contained.
         /// </summary>
-        public static string UIStreamingAssetsDirectory = "ui";
+        public static readonly string UIStreamingAssetsDirectory = "ui";
 
         /// <summary>
         /// The path where UI assets will be loaded from.
@@ -20,7 +21,7 @@ namespace Torii.UI
         /// </summary>
         public static string UIDirectory
         {
-            get { return Path.Combine(Application.streamingAssetsPath, UIStreamingAssetsDirectory); }
+            get { return PathUtil.Combine(Application.streamingAssetsPath, UIStreamingAssetsDirectory); }
         }
 
         public static void Initialize()

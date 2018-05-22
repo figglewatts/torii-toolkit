@@ -14,7 +14,7 @@ namespace Torii.Resource.Handlers
             return typeof(Texture2D);
         }
 
-        public void Load(string path, ResourceLifespan span)
+        public void Load(string path, int span)
         {
             byte[] fileData = File.ReadAllBytes(path);
 
