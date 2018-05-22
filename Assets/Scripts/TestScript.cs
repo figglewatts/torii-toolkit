@@ -1,12 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Torii;
 using Torii.Resource;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TestScript : MonoBehaviour {
 
-	// Use this for initialization
+    void Awake()
+    {
+        ToriiToolkit.Initialize();
+    }
+
 	void Start ()
 	{
 	    Sprite s = ResourceManager.Load<Sprite>(Application.streamingAssetsPath + "/ui/sprite/test.json");

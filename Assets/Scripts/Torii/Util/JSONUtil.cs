@@ -25,6 +25,8 @@ namespace SimpleJSON
 {
     public partial class JSONNode
     {
+        // Implicit JSON conversion methods extend existing SimpleJSON functionality
+
         public static implicit operator JSONNode(Rect rect)
         {
             JSONNode node = new JSONObject();

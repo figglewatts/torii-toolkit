@@ -14,6 +14,10 @@ namespace Torii.UI
         /// </summary>
         public static string UIStreamingAssetsDirectory = "ui";
 
+        /// <summary>
+        /// The path where UI assets will be loaded from.
+        /// Combines StreamingAssetsPath with UIStreamingAssetsDirectory.
+        /// </summary>
         public static string UIDirectory
         {
             get { return Path.Combine(Application.streamingAssetsPath, UIStreamingAssetsDirectory); }
