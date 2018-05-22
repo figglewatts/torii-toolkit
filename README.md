@@ -1,2 +1,2 @@
-# torii-ui
-Declarative UI framework in Unity.
+# torii-toolkit
+A Unity Framework.
