@@ -53,11 +53,13 @@ namespace Torii.UI
 
         public Color Color
         {
+            get { return Background.color; }
             set { Background.color = value; }
         }
 
         public RectOffset Padding
         {
+            get { return Layout.padding; }
             set { Layout.padding = value; }
         }
 
@@ -161,7 +163,6 @@ namespace Torii.UI
         }
     }
 
-    [Serializable]
     public enum WidgetLayoutType
     {
         Grid,
@@ -169,7 +170,6 @@ namespace Torii.UI
         Vertical
     }
 
-    [Serializable]
     public enum WidgetBackgroundType
     {
         Sprite,
