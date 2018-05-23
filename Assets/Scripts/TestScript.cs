@@ -15,11 +15,16 @@ public class TestScript : MonoBehaviour {
 
 	void Start ()
 	{
-        GameObject canvas = GameObject.FindWithTag("MainCanvas");
-	    GameObject tuiWidget = TUIWidget.Create(WidgetLayoutType.Vertical, WidgetBackgroundType.Sprite,
+	    TUIWidget widget = TUIWidget.Create(WidgetLayoutType.Vertical, WidgetBackgroundType.Sprite,
 	        Application.streamingAssetsPath + "/ui/sprite/test.json");
-        tuiWidget.transform.SetParent(canvas.transform);
-	    tuiWidget.GetComponent<TUIWidget>().Color = Color.red;
+        TUICanvas.Instance.AddWidget(widget);
+	    widget.Anchor = AnchorType.Stretch;
+        Debug.Log(widget.Size);
+        Vector2 canvasSize = new Vector2(TUICanvas.Instance.Canvas.pixelRect.width, TUICanvas.Instance.Canvas.pixelRect.height);
+        Debug.Log(Vector2.Scale(widget.RectTransform.anchorMax - widget.RectTransform.anchorMin, canvasSize));
+        Debug.Log(widget.RectTransform.rect.width);
+	    widget.Size = new Vector2(100, 100);
+        Debug.Log(widget.Size);
 	}
 	
 	// Update is called once per frame
