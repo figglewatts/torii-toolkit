@@ -33,8 +33,6 @@ namespace Torii.Resource
             loadLifespans();
         }
 
-        // TODO: user configurable resource lifespans?
-
         public static void ClearLifespan(string span)
         {
             int spanID = _lifespans[span];

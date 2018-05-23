@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Torii;
 using Torii.Resource;
+using Torii.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,10 +15,10 @@ public class TestScript : MonoBehaviour {
 
 	void Start ()
 	{
-	    Sprite s = ResourceManager.Load<Sprite>(Application.streamingAssetsPath + "/ui/sprite/test.json");
-
-        Image i = GameObject.FindWithTag("Respawn").GetComponent<Image>();
-	    i.sprite = s;
+        GameObject canvas = GameObject.FindWithTag("MainCanvas");
+	    GameObject tuiWidget = TUIWidget.Create(WidgetLayoutType.Vertical, WidgetBackgroundType.Sprite,
+	        Application.streamingAssetsPath + "/ui/sprite/test-non9s.json");
+        tuiWidget.transform.SetParent(canvas.transform);
 	}
 	
 	// Update is called once per frame
