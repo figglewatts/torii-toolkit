@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Torii.UI
 {
-    public class TUIPanel : Image
+    public class TUIPanel : TUIWidget
     {
         
     }

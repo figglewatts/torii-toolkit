@@ -6,16 +6,23 @@ using System.Text;
 using Torii.Resource;
 using Torii.Util;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Torii.UI
 {
     public class TUIWidget : MonoBehaviour
     {
-        public LayoutElement Element { get; private set; }
+        public LayoutElement Element { get; protected set; }
 
-        public WidgetLayoutType LayoutType { get; private set; }
-        public WidgetBackgroundType BackgroundType { get; private set; }
+        public WidgetLayoutType LayoutType { get; protected set; }
+        public WidgetBackgroundType BackgroundType { get; protected set; }
+
+        public EventTrigger Events
+        {
+            get { return GetComponent<EventTrigger>(); }
+        }
 
         public Graphic Background
         {
@@ -179,6 +186,28 @@ namespace Torii.UI
             get { return this.GetComponentsInChildrenNonRecursive<TUIWidget>(); }
         }
 
+        public void AddChild(TUIWidget widget)
+        {
+            widget.transform.SetParent(this.transform);
+        }
+
+        public void RegisterEvent(EventTriggerType type, UnityAction<BaseEventData> callback)
+        {
+            foreach (EventTrigger.Entry entry in Events.triggers)
+            {
+                if (entry.eventID == type)
+                {
+                    entry.callback.AddListener(callback);
+                    return;
+                }
+            }
+
+            EventTrigger.Entry newEntry = new EventTrigger.Entry();
+            newEntry.eventID = type;
+            newEntry.callback.AddListener(callback);
+            Events.triggers.Add(newEntry);
+        }
+
         public static TUIWidget Create(WidgetLayoutType layout, LayoutElement element = null)
         {
             return createBaseWidget(layout, WidgetBackgroundType.Sprite, element == null);
@@ -230,7 +259,7 @@ namespace Torii.UI
             }
         }
 
-        private static TUIWidget createBaseWidget(WidgetLayoutType layout, WidgetBackgroundType background, bool sizeControlledByLayout)
+        protected static TUIWidget createBaseWidget(WidgetLayoutType layout, WidgetBackgroundType background, bool sizeControlledByLayout)
         {
             GameObject obj = new GameObject("TUIWidget");
             obj.layer |= LayerMask.NameToLayer("UI");
@@ -241,10 +270,10 @@ namespace Torii.UI
                     obj.AddComponent<GridLayoutGroup>();
                     break;
                 case WidgetLayoutType.Horizontal:
-                    obj.AddComponent<VerticalLayoutGroup>();
+                    obj.AddComponent<HorizontalLayoutGroup>();
                     break;
                 case WidgetLayoutType.Vertical:
-                    obj.AddComponent<HorizontalLayoutGroup>();
+                    obj.AddComponent<VerticalLayoutGroup>();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("layout", layout, "Layout type not found!");
@@ -266,6 +295,8 @@ namespace Torii.UI
             {
                 obj.AddComponent<LayoutElement>();
             }
+
+            obj.AddComponent<EventTrigger>();
 
             TUIWidget widget = obj.AddComponent<TUIWidget>();
             widget.LayoutType = layout;
