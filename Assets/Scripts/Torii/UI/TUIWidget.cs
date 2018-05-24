@@ -208,21 +208,21 @@ namespace Torii.UI
             Events.triggers.Add(newEntry);
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, LayoutElement element = null)
+        public static TUIWidget Create(WidgetLayoutType layout, LayoutElementData element = null)
         {
-            return createBaseWidget(layout, WidgetBackgroundType.Sprite, element == null);
+            return createBaseWidget(layout, WidgetBackgroundType.Sprite, element);
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, Color background, LayoutElement element = null)
+        public static TUIWidget Create(WidgetLayoutType layout, Color background, LayoutElementData element = null)
         {
-            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Sprite, element == null);
+            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Sprite, element);
             widget.GetComponent<TUIWidget>().Color = background;
             return widget;
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, Sprite background, LayoutElement element = null)
+        public static TUIWidget Create(WidgetLayoutType layout, Sprite background, LayoutElementData element = null)
         {
-            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Sprite, element == null);
+            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Sprite, element);
             Image uiImage = widget.GetComponent<Image>();
             uiImage.sprite = background;
             if (uiImage.sprite.HasBorder())
@@ -233,14 +233,14 @@ namespace Torii.UI
             return widget;
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, Texture2D background, LayoutElement element = null)
+        public static TUIWidget Create(WidgetLayoutType layout, Texture2D background, LayoutElementData element = null)
         {
-            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Texture, element == null);
+            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Texture, element);
             widget.GetComponent<RawImage>().texture = background;
             return widget;
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, WidgetBackgroundType background, string path, LayoutElement element = null)
+        public static TUIWidget Create(WidgetLayoutType layout, WidgetBackgroundType background, string path, LayoutElementData element = null)
         {
             switch (background)
             {
@@ -259,7 +259,7 @@ namespace Torii.UI
             }
         }
 
-        protected static TUIWidget createBaseWidget(WidgetLayoutType layout, WidgetBackgroundType background, bool sizeControlledByLayout)
+        protected static TUIWidget createBaseWidget(WidgetLayoutType layout, WidgetBackgroundType background, LayoutElementData element)
         {
             GameObject obj = new GameObject("TUIWidget");
             obj.layer |= LayerMask.NameToLayer("UI");
@@ -291,9 +291,10 @@ namespace Torii.UI
                     throw new ArgumentOutOfRangeException("background", background, "Background type not found!");
             }
 
-            if (!sizeControlledByLayout)
+            if (element != null)
             {
-                obj.AddComponent<LayoutElement>();
+                LayoutElement layoutElement = obj.AddComponent<LayoutElement>();
+                element.Set(ref layoutElement);
             }
 
             obj.AddComponent<EventTrigger>();

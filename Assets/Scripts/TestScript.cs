@@ -23,7 +23,6 @@ public class TestScript : MonoBehaviour {
 	    VerticalLayoutGroup lg = widget.Layout as VerticalLayoutGroup;
 	    lg.spacing = 20;
 
-
         TUIWidget subWidget1 = TUIWidget.Create(WidgetLayoutType.Horizontal, Color.red);
         widget.AddChild(subWidget1);
         subWidget1.RegisterEvent(EventTriggerType.PointerClick, eventData =>
