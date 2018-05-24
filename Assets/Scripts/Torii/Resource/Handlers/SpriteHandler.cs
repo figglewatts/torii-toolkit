@@ -33,7 +33,7 @@ namespace Torii.Resource.Handlers
             float ppuValue = sprite["ppu"];
             JSONObject borderValue = sprite["border"].AsObject;
 
-            Texture2D texture = ResourceManager.Load<Texture2D>(TUI.UIDirectory + "/" + textureValue, span);
+            Texture2D texture = ResourceManager.Load<Texture2D>(TUI.UIUserDataDirectory + "/" + textureValue, span);
             Rect rect = new Rect(0, 0, texture.width, texture.height);
             if (rectValue.Count != 0)
             {

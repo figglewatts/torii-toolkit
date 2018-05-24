@@ -48,8 +48,23 @@ namespace Torii.Resource
 
             foreach (string key in toRemove)
             {
-                _resources.Remove(key);
+                switch (_resources[key].ResourceType)
+                {
+                    case ResourceType.Streamed:
+                        _resources.Remove(key);
+                        break;
+                    case ResourceType.Unity:
+                        Resources.UnloadAsset((UnityEngine.Object)_resources[key].GetData());
+                        _resources.Remove(key);
+                        break;
+                }
+                
             }
+        }
+
+        public static void ClearUnusedUnityAssets()
+        {
+            Resources.UnloadUnusedAssets();
         }
 
         public static T Load<T>(string path)
@@ -80,6 +95,32 @@ namespace Torii.Resource
             _handlers[typeof(T)].Load(path, span);
 
             return ((Resource<T>)_resources[path]).Data;
+        }
+
+        public static T UnityLoad<T>(string path) where T : UnityEngine.Object
+        {
+            return UnityLoad<T>(path, _lifespans["global"]);
+        }
+
+        public static T UnityLoad<T>(string path, string span) where T : UnityEngine.Object
+        {
+            return UnityLoad<T>(path, _lifespans[span]);
+        }
+
+        public static T UnityLoad<T>(string path, int span) where T : UnityEngine.Object
+        {
+            Resource<T> res;
+            if (checkCache(path, out res)) return res.Data;
+
+            // add it to the cache if it didn't already exist
+            res = new Resource<T>(span, ResourceType.Unity)
+            {
+                Data = Resources.Load<T>(path)
+            };
+            string resourcePath = PathUtil.Combine("Resources", path);
+            _resources[resourcePath] = res;
+
+            return Resources.Load<T>(path);
         }
 
         public static void RegisterResource(string path, GenericResource r)
