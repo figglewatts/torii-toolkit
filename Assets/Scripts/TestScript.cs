@@ -18,18 +18,19 @@ public class TestScript : MonoBehaviour {
 
 	void Start ()
 	{
-	    Sprite s = ResourceManager.UnityLoad<Sprite>("test-9s");
-	    Sprite s2 = ResourceManager.UnityLoad<Sprite>("test-9s");
+	    TUIStyleSheet sheet =
+	        ResourceManager.UnityLoad<TUIStyleSheet>("ui/test-style");
 
-	    TUIWidget widget = TUIWidget.Create(WidgetLayoutType.Vertical, s);
-	    TUICanvas.Instance.AddWidget(widget);
-	    widget.Anchor = AnchorType.HStretchTop;
-	    widget.Size = new Vector2(widget.Size.x, 300);
+        TUIWidget container = TUIWidget.Create(WidgetLayoutType.Vertical, Color.grey);
+	    TUICanvas.Instance.AddWidget(container);
+        container.Anchor = AnchorType.HStretchTop;
+        container.Size = new Vector2(container.Size.x, 500);
 
-	    TUIWidget widget2 = TUIWidget.Create(WidgetLayoutType.Vertical, s2);
-	    TUICanvas.Instance.AddWidget(widget2);
-	    widget2.Anchor = AnchorType.HStretchBottom;
-	    widget2.Size = new Vector2(widget.Size.x, 200);
+        TUIWidget regularTest = sheet.CreateWidget();
+        container.AddChild(regularTest);
+
+	    TUIWidget redTest = sheet.CreateWidget("red");
+        container.AddChild(redTest);
 	}
 	
 	// Update is called once per frame

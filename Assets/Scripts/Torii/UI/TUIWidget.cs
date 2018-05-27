@@ -12,6 +12,7 @@ using UnityEngine.UI;
 
 namespace Torii.UI
 {
+    // TODO: expose more layout options
     public class TUIWidget : MonoBehaviour
     {
         public LayoutElement Element { get; protected set; }
@@ -179,8 +180,12 @@ namespace Torii.UI
 
         public RectOffset Padding
         {
-            get { return Layout.padding; }
-            set { Layout.padding = value; }
+            get { return LayoutType == WidgetLayoutType.None ? null : Layout.padding; }
+            set
+            {
+                if (LayoutType == WidgetLayoutType.None) return;
+                Layout.padding = value;
+            }
         }
 
         public TUIWidget[] Children
@@ -249,19 +254,26 @@ namespace Torii.UI
             return widget;
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, WidgetBackgroundType background, string path, LayoutElementData element = null)
+        public static TUIWidget Create(WidgetLayoutType layout, WidgetBackgroundType background, string path, bool streamingAssets = true, LayoutElementData element = null)
         {
+            path = PathUtil.Combine(streamingAssets ? TUI.UIUserDataDirectory : TUI.UIDataDirectory, path);
+
             switch (background)
             {
                 case WidgetBackgroundType.Sprite:
                 {
-                    Sprite backgroundSprite = ResourceManager.Load<Sprite>(path);
+                    var backgroundSprite = streamingAssets
+                        ? ResourceManager.Load<Sprite>(path)
+                        : ResourceManager.UnityLoad<Sprite>(path);
+
                     return Create(layout, backgroundSprite, element);
                 }
                 case WidgetBackgroundType.Texture:
                 {
-                    Texture2D backgroundTex = ResourceManager.Load<Texture2D>(path);
-                    return Create(layout, backgroundTex, element);
+                    var backgroundTex = streamingAssets
+                        ? ResourceManager.Load<Texture2D>(path)
+                        : ResourceManager.UnityLoad<Texture2D>(path);
+                        return Create(layout, backgroundTex, element);
                 }
                 default:
                     throw new ArgumentOutOfRangeException("background", background, "Background type not found!");

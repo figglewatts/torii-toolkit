@@ -9,9 +9,9 @@ namespace Torii.Resource.Handlers
 {
     public class Texture2DHandler : IResourceHandler
     {
-        public Type GetResourceType()
+        public Type HandlerType
         {
-            return typeof(Texture2D);
+            get { return typeof(Texture2D); }
         }
 
         public void Load(string path, int span)

@@ -14,7 +14,7 @@ namespace Torii.UI
         public TUIStyleSheet(JSONNode json)
         {
             _classes = new Dictionary<string, TUIStyle>();
-            _classes[""] = TUIStyle.DefaultFallback;;
+            _classes["*"] = TUIStyle.DefaultFallback;;
 
             foreach (string key in json.Keys)
             {
@@ -22,14 +22,14 @@ namespace Torii.UI
             }
         }
 
-        public TUIWidget CreateWidget(string widgetClass = "")
+        public TUIWidget CreateWidget(string widgetClass = "*")
         {
             TUIStyle style = null;
 
             // if the class doesn't exist use the default
             if (!_classes.ContainsKey(widgetClass))
             {
-                Debug.LogWarning("Widget style class " + widgetClass + " not found! Using default instead.");
+                Debug.LogWarning("TUIStyleSheet: TUIWidget style class '" + widgetClass + "' not found! Using default instead.");
                 style = TUIStyle.DefaultFallback;;
             }
             else

@@ -1,6 +1,7 @@
 {
 	"type": "sprite",
 	"texture": "textures/test-9s.png",
+	"streamingAssets": true,
 	"ppu": 100.0,
 	"border": {
 		"x": 32,

@@ -14,6 +14,7 @@ namespace Torii.Resource
     {
         private static readonly Dictionary<string, GenericResource> _resources;
         private static readonly Dictionary<Type, IResourceHandler> _handlers;
+        private static readonly Dictionary<Type, ITextAssetHandler> _textAssetProcessors;
         private static readonly ResourceLifespans _lifespans;
 
         private static readonly string lifespansDataFileName = "resourcelifespans.json";
@@ -22,6 +23,7 @@ namespace Torii.Resource
         {
             _resources = new Dictionary<string, GenericResource>();
             _handlers = new Dictionary<Type, IResourceHandler>();
+            _textAssetProcessors = new Dictionary<Type, ITextAssetHandler>();
             _lifespans = new ResourceLifespans();
         }
 
@@ -29,6 +31,9 @@ namespace Torii.Resource
         {
             RegisterHandler(new SpriteHandler());
             RegisterHandler(new Texture2DHandler());
+            RegisterHandler(new TUIStyleSheetHandler());
+
+            RegisterTextAssetProcessor(new TUIStyleSheetHandler());
 
             loadLifespans();
         }
@@ -104,17 +109,17 @@ namespace Torii.Resource
             return ((Resource<T>)_resources[path]).Data;
         }
 
-        public static T UnityLoad<T>(string path) where T : UnityEngine.Object
+        public static T UnityLoad<T>(string path) where T : class
         {
             return UnityLoad<T>(path, _lifespans["global"]);
         }
 
-        public static T UnityLoad<T>(string path, string span) where T : UnityEngine.Object
+        public static T UnityLoad<T>(string path, string span) where T : class
         {
             return UnityLoad<T>(path, _lifespans[span]);
         }
 
-        public static T UnityLoad<T>(string path, int span) where T : UnityEngine.Object
+        public static T UnityLoad<T>(string path, int span) where T : class
         {
             // prepend "Resources" to the start of the path to prevent edge cases
             // where the same name file in StreamingAssets could conflict
@@ -123,14 +128,43 @@ namespace Torii.Resource
             Resource<T> res;
             if (checkCache(resourcePath, out res)) return res.Data;
 
-            // add it to the cache if it didn't already exist
-            res = new Resource<T>(span, ResourceType.Unity)
+            // check if the asset can be processed as text
+            if (_textAssetProcessors.ContainsKey(typeof(T)))
             {
-                Data = Resources.Load<T>(path)
-            };
+                ITextAssetHandler handler = _textAssetProcessors[typeof(T)];
+                TextAsset textAsset = Resources.Load<TextAsset>(path);
+
+                // check to see if we loaded successfully
+                if (textAsset == null)
+                {
+                    throw new ResourceLoadException("Unable to load resource: '" + path + "'", typeof(T));
+                }
+                
+                res = new Resource<T>(span)
+                {
+                    Data = (T)handler.Process(textAsset)
+                };
+
+                // we don't need the text asset anymore
+                Resources.UnloadAsset(textAsset);
+            }
+            else
+            {
+                // otherwise just load it using Unity's resource handling
+                res = new Resource<T>(span, ResourceType.Unity)
+                {
+                    Data = Resources.Load(path, typeof(T)) as T
+                };
+            }
+
+            if (res.Data == null)
+            {
+                throw new ResourceLoadException("Unable to load resource: '" + path + "'", typeof(T));
+            }
+
             _resources[resourcePath] = res;
 
-            return Resources.Load<T>(path);
+            return res.Data;
         }
 
         public static void RegisterResource(string path, GenericResource r)
@@ -140,7 +174,12 @@ namespace Torii.Resource
 
         public static void RegisterHandler(IResourceHandler handler)
         {
-            _handlers[handler.GetResourceType()] = handler;
+            _handlers[handler.HandlerType] = handler;
+        }
+
+        public static void RegisterTextAssetProcessor(ITextAssetHandler handler)
+        {
+            _textAssetProcessors[handler.HandlerType] = handler;
         }
 
         private static bool checkCache<T>(string path, out T data) where T : class

@@ -12,9 +12,9 @@ namespace Torii.Resource.Handlers
 {
     class SpriteHandler : IResourceHandler
     {
-        public Type GetResourceType()
+        public Type HandlerType
         {
-            return typeof(Sprite);
+            get { return typeof(Sprite); }
         }
 
         public void Load(string path, int span)
@@ -27,28 +27,28 @@ namespace Torii.Resource.Handlers
                     "Could not load resource: JSON type '" + sprite["type"] + "' did not match 'sprite'",
                     typeof(Sprite));
             }
-            string textureValue = sprite["texture"];
-            JSONObject rectValue = sprite["rect"].AsObject;
-            JSONObject pivotValue = sprite["pivot"].AsObject;
-            float ppuValue = sprite["ppu"];
-            JSONObject borderValue = sprite["border"].AsObject;
 
-            Texture2D texture = ResourceManager.Load<Texture2D>(TUI.UIUserDataDirectory + "/" + textureValue, span);
-            Rect rect = new Rect(0, 0, texture.width, texture.height);
-            if (rectValue.Count != 0)
+            bool streamingAssets = sprite.GetValueOrDefault<JSONBool>("streamingAssets", true);
+
+            string textureValue = sprite["texture"];
+            if (string.IsNullOrEmpty(textureValue))
             {
-                rect = rectValue;
+                throw new ArgumentException(
+                    "SpriteHandler: \"texture\" JSON key was null or empty! Sprite must have a texture.", "path");
             }
-            Vector2 pivot = new Vector2(texture.width / 2f, texture.height / 2f);
-            if (pivotValue.Count != 0)
-            {
-                pivot = pivotValue;
-            }
-            Vector4 border = Vector4.zero;
-            if (borderValue.Count != 0)
-            {
-                border = borderValue;
-            }
+
+            float ppuValue = sprite.GetValueOrDefault<JSONNumber>("ppu", 100);
+
+            Texture2D texture = streamingAssets
+                ? ResourceManager.Load<Texture2D>(PathUtil.Combine(TUI.UIUserDataDirectory, textureValue))
+                : ResourceManager.UnityLoad<Texture2D>(PathUtil.Combine(TUI.UIDataDirectory, textureValue));
+
+            Rect rect = sprite.GetValueOrDefault<JSONNode>("rect", new Rect(0, 0, texture.width, texture.height));
+
+            Vector2 pivot =
+                sprite.GetValueOrDefault<JSONNode>("pivot", new Vector2(texture.width / 2f, texture.height / 2f));
+
+            Vector4 border = sprite.GetValueOrDefault<JSONNode>("border", Vector4.zero);
 
             Sprite s = Sprite.Create(texture, rect, pivot, ppuValue, 0, SpriteMeshType.FullRect, border);
             Resource<Sprite> resource = new Resource<Sprite>(s, span);

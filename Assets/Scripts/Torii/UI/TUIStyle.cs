@@ -12,14 +12,17 @@ namespace Torii.UI
 {
     public class TUIStyle
     {
-        public string BackgroundGraphicPath { get; protected set; }
-        public WidgetLayoutType LayoutType { get; protected set; }
-        public WidgetBackgroundType BackgroundType { get; protected set; }
-        public LayoutElementData LayoutElement { get; protected set; }
-        public Vector2? Pivot { get; protected set; }
-        public Color? Color { get; protected set; }
-        public AnchorType Anchor { get; protected set; }
-        public RectOffset Padding { get; protected set; }
+        protected string BackgroundGraphicPath { get; set; }
+        protected bool UseStreamingAssets { get; set; }
+        protected WidgetLayoutType LayoutType { get; set; }
+        protected WidgetBackgroundType BackgroundType { get; set; }
+        protected LayoutElementData LayoutElement { get; set; }
+        protected Vector2 Pivot { get; set; }
+        protected Color Color { get; set; }
+        protected AnchorType Anchor { get; set; }
+        protected RectOffset Padding { get; set; }
+
+        // TODO: layout spacing
 
         public TUIStyle(JSONNode json)
         {
@@ -29,15 +32,17 @@ namespace Torii.UI
 
             BackgroundGraphicPath = json["backgroundGraphic"];
 
+            UseStreamingAssets = json.GetValueOrDefault<JSONBool>("streamingAssets", true);
+
             string layoutType = json.GetValueOrDefault<JSONString>("layoutType", WidgetLayoutType.None.ToString());
             LayoutType = EnumUtil.Parse<WidgetLayoutType>(layoutType);
 
             JSONNode layoutElement = json["layoutElement"];
             LayoutElement = layoutElement == null ? null : new LayoutElementData(layoutElement);
 
-            Pivot = json["pivot"];
+            Pivot = json.GetValueOrDefault<JSONNode>("pivot", new Vector2(0.5f, 0.5f));
 
-            Color = json["color"];
+            Color = json.GetValueOrDefault<JSONNode>("color", UnityEngine.Color.white);
 
             string anchorType = json.GetValueOrDefault<JSONString>("anchorType", AnchorType.TopLeft.ToString());
             Anchor = EnumUtil.Parse<AnchorType>(anchorType);
@@ -46,15 +51,17 @@ namespace Torii.UI
         }
 
         public TUIStyle(string backgroundGraphicPath,
+            bool useStreamingAssets,
             WidgetLayoutType layoutType,
             WidgetBackgroundType backgroundType,
             LayoutElementData layoutElement,
-            Vector2? pivot,
+            Vector2 pivot,
             Color color,
             AnchorType anchor,
             RectOffset padding)
         {
             BackgroundGraphicPath = backgroundGraphicPath;
+            UseStreamingAssets = useStreamingAssets;
             LayoutType = layoutType;
             BackgroundType = backgroundType;
             LayoutElement = layoutElement;
@@ -64,8 +71,8 @@ namespace Torii.UI
             Padding = padding;
         }
 
-        public static readonly TUIStyle DefaultFallback = new TUIStyle("", WidgetLayoutType.None,
-            WidgetBackgroundType.Sprite, null, null, UnityEngine.Color.white,
+        public static readonly TUIStyle DefaultFallback = new TUIStyle("", true, WidgetLayoutType.None,
+            WidgetBackgroundType.Sprite, null, new Vector2(0.5f, 0.5f), UnityEngine.Color.white,
             AnchorType.TopLeft, new RectOffset(0, 0, 0, 0));
 
         public TUIWidget CreateWidget()
@@ -79,11 +86,11 @@ namespace Torii.UI
             }
             else
             {
-                widget = TUIWidget.Create(LayoutType, BackgroundType, BackgroundGraphicPath, LayoutElement);
+                widget = TUIWidget.Create(LayoutType, BackgroundType, BackgroundGraphicPath, UseStreamingAssets, LayoutElement);
             }
 
-            widget.Color = Color.GetValueOrDefault(UnityEngine.Color.white);
-            widget.Pivot = Pivot.GetValueOrDefault(new Vector2(0.5f, 0.5f));
+            widget.Color = Color;
+            widget.Pivot = Pivot;
             widget.Anchor = Anchor;
             widget.Padding = Padding;
 

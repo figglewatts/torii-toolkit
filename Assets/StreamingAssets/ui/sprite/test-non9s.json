@@ -1,5 +1,5 @@
 {
 	"type": "sprite",
-	"texture": "textures/test-9s.png",
-	"ppu": 100.0
+	"texture": "sprite/test-9s.png",
+	"streamingAssets": true
 }

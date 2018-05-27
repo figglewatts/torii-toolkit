@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Torii.Resource
 {
-    public interface IResourceHandler
+    public interface ITextAssetHandler
     {
         Type HandlerType { get; }
 
-        void Load(string path, int span);
+        object Process(TextAsset textAsset);
     }
 }

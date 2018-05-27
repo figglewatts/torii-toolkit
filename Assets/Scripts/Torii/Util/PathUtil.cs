@@ -9,7 +9,7 @@ namespace Torii.Util
     public static class PathUtil
     {
         /// <summary>
-        /// Combines two elements into a path.
+        /// Combines two elements into a path. Converts back slashes in path to forward slashes.
         /// </summary>
         /// <param name="a">Element A</param>
         /// <param name="b">Element B</param>
@@ -20,11 +20,11 @@ namespace Torii.Util
             {
                 b = b.Substring(1);
             }
-            return Path.Combine(a, b);
+            return Path.Combine(a, b).Replace('\\', '/');
         }
 
         /// <summary>
-        /// Combines any number of path parameters.
+        /// Combines any number of path parameters. Converts back slashes in path to forward slashes.
         /// </summary>
         /// <param name="componentStrings">Any number of path elements to combine</param>
         /// <returns>The combined path.</returns>
@@ -35,7 +35,7 @@ namespace Torii.Util
             {
                 path = Combine(path, componentStrings[i]);
             }
-            return path;
+            return path.Replace('\\', '/');
         }
     }
 }
