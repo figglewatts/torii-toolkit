@@ -19,6 +19,8 @@ namespace Torii.UI
         public WidgetLayoutType LayoutType { get; protected set; }
         public WidgetBackgroundType BackgroundType { get; protected set; }
 
+        public TUIWidget Parent { get; protected set; }
+
         public EventTrigger Events
         {
             get { return GetComponent<EventTrigger>(); }
@@ -189,6 +191,13 @@ namespace Torii.UI
         public void AddChild(TUIWidget widget)
         {
             widget.transform.SetParent(this.transform);
+            widget.Parent = this;
+        }
+
+        public void RemoveChild(TUIWidget widget)
+        {
+            widget.transform.SetParent(null);
+            widget.Parent = null;
         }
 
         public void RegisterEvent(EventTriggerType type, UnityAction<BaseEventData> callback)
@@ -275,6 +284,9 @@ namespace Torii.UI
                 case WidgetLayoutType.Vertical:
                     obj.AddComponent<VerticalLayoutGroup>();
                     break;
+                case WidgetLayoutType.None:
+                    // intentionally empty
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException("layout", layout, "Layout type not found!");
             }
@@ -305,6 +317,7 @@ namespace Torii.UI
             widget.Anchor = AnchorType.TopLeft;
             widget.Position = Vector2.zero;
             widget.Pivot = new Vector2(0, 1);
+            widget.Color = Color.white;
 
             return widget;
         }
@@ -314,7 +327,8 @@ namespace Torii.UI
     {
         Grid,
         Horizontal,
-        Vertical
+        Vertical,
+        None
     }
 
     public enum WidgetBackgroundType

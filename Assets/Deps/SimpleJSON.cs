@@ -769,17 +769,6 @@ namespace SimpleJSON
             }
         }
 
-        public override JSONNode this[string aKey]
-        {
-            get { return new JSONLazyCreator(this); }
-            set
-            {
-                if (value == null)
-                    value = JSONNull.CreateOrGet();
-                m_List.Add(value);
-            }
-        }
-
         public override int Count
         {
             get { return m_List.Count; }
@@ -865,7 +854,7 @@ namespace SimpleJSON
                 if (m_Dict.ContainsKey(aKey))
                     return m_Dict[aKey];
                 else
-                    return new JSONLazyCreator(this, aKey);
+                    return null;
             }
             set
             {

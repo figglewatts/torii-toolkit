@@ -82,6 +82,13 @@ namespace Torii.Resource
             Resource<T> res;
             if (checkCache(path, out res)) return res.Data;
 
+            path = path.Trim();
+
+            if (path.Equals(string.Empty))
+            {
+                throw new ArgumentException("Could not load resource: path argument cannot be empty", "path");
+            }
+
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException("Could not load resource: File '" + path + "' not found", path);
@@ -109,15 +116,18 @@ namespace Torii.Resource
 
         public static T UnityLoad<T>(string path, int span) where T : UnityEngine.Object
         {
+            // prepend "Resources" to the start of the path to prevent edge cases
+            // where the same name file in StreamingAssets could conflict
+            string resourcePath = PathUtil.Combine("Resources", path);
+
             Resource<T> res;
-            if (checkCache(path, out res)) return res.Data;
+            if (checkCache(resourcePath, out res)) return res.Data;
 
             // add it to the cache if it didn't already exist
             res = new Resource<T>(span, ResourceType.Unity)
             {
                 Data = Resources.Load<T>(path)
             };
-            string resourcePath = PathUtil.Combine("Resources", path);
             _resources[resourcePath] = res;
 
             return Resources.Load<T>(path);

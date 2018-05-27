@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SimpleJSON;
+using Torii.Util;
 using UnityEngine.UI;
 
 namespace Torii.UI
@@ -29,6 +31,18 @@ namespace Torii.UI
             FlexibleWidth = flexibleWidth;
             FlexibleHeight = flexibleHeight;
             LayoutPriority = layoutPriority;
+        }
+
+        public LayoutElementData(JSONNode json)
+        {
+            IgnoreLayout = json.GetValueOrDefault<JSONBool>("ignoreLayout", false);
+            MinWidth = json.GetValueOrDefault<JSONNumber>("minWidth", -1);
+            MinHeight = json.GetValueOrDefault<JSONNumber>("minHeight", -1);
+            PreferredWidth = json.GetValueOrDefault<JSONNumber>("preferredWidth", -1);
+            PreferredHeight = json.GetValueOrDefault<JSONNumber>("preferredHeight", -1);
+            FlexibleWidth = json.GetValueOrDefault<JSONNumber>("flexibleWidth", -1);
+            FlexibleHeight = json.GetValueOrDefault<JSONNumber>("flexibleHeight", -1);
+            LayoutPriority = json.GetValueOrDefault<JSONNumber>("layoutPriority", 1);
         }
 
         public void Set(ref LayoutElement element)
