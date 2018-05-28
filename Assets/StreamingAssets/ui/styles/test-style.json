@@ -13,7 +13,7 @@
 		"anchorType": "TopLeft"
 	},
 	"red": {
-		"layoutType": "None",
+		"layoutType": "Grid",
 		"color": {
 			"r": 1,
 			"g": 0,
@@ -24,6 +24,33 @@
 		"layoutElement": {
 			"minHeight": 100,
 			"preferredHeight": 100
+		},
+		"gridLayout": {
+			"cellSize": {
+				"x": 120,
+				"y": 120
+			},
+			"constraint": "FixedColumnCount",
+			"constraintCount": 4,
+			"startAxis": "Horizontal",
+			"layoutSpacing": {
+				"x": 20,
+				"y": 10
+			}
+		}
+	},
+	"blue": {
+		"layoutType": "None",
+		"color": {
+			"r": 0,
+			"g": 0,
+			"b": 1,
+			"a": 1
+		},
+		"anchorType": "TopLeft",
+		"layoutElement": {
+			"minWidth": 100,
+			"minHeight": 100
 		}
 	}
 }

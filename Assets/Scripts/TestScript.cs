@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
 using Torii;
@@ -26,16 +27,26 @@ public class TestScript : MonoBehaviour {
         container.Anchor = AnchorType.HStretchTop;
         container.Size = new Vector2(container.Size.x, 500);
 	    container.VerticalLayout.spacing = 20;
-	    container.HorizontalOrVerticalLayout.childForceExpandHeight = false;
 
         TUIWidget regularTest = sheet.CreateWidget();
         container.AddChild(regularTest);
 
 	    TUIWidget redTest = sheet.CreateWidget("red");
         container.AddChild(redTest);
+
+	    for (int i = 0; i < 6; i++)
+	    {
+	        TUIWidget blueWidget = sheet.CreateWidget("blue");
+	        var i1 = i;
+	        blueWidget.RegisterEvent(EventTriggerType.PointerClick, pointerData =>
+            {
+                Debug.Log("Button " + i1 + " pressed!");
+            });
+            redTest.AddChild(blueWidget);
+	    }
 	}
-	
-	// Update is called once per frame
+
+    // Update is called once per frame
 	void Update () {
 		
 	}
