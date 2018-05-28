@@ -19,12 +19,14 @@ public class TestScript : MonoBehaviour {
 	void Start ()
 	{
 	    TUIStyleSheet sheet =
-	        ResourceManager.UnityLoad<TUIStyleSheet>("ui/test-style");
+	        ResourceManager.Load<TUIStyleSheet>(Application.streamingAssetsPath + "/ui/styles/test-style.json");
 
         TUIWidget container = TUIWidget.Create(WidgetLayoutType.Vertical, Color.grey);
 	    TUICanvas.Instance.AddWidget(container);
         container.Anchor = AnchorType.HStretchTop;
         container.Size = new Vector2(container.Size.x, 500);
+	    container.VerticalLayout.spacing = 20;
+	    container.HorizontalOrVerticalLayout.childForceExpandHeight = false;
 
         TUIWidget regularTest = sheet.CreateWidget();
         container.AddChild(regularTest);

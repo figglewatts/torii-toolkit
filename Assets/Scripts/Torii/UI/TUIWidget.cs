@@ -12,7 +12,6 @@ using UnityEngine.UI;
 
 namespace Torii.UI
 {
-    // TODO: expose more layout options
     public class TUIWidget : MonoBehaviour
     {
         public LayoutElement Element { get; protected set; }
@@ -56,9 +55,67 @@ namespace Torii.UI
                     case WidgetLayoutType.Vertical:
                         return GetComponent<VerticalLayoutGroup>();
                     default:
-                        return null;
+                        throw new InvalidOperationException("Cannot get LayoutGroup if widget has no layout component!");
                 }
             }
+        }
+
+        public GridLayoutGroup GridLayout
+        {
+            get
+            {
+                if (LayoutType == WidgetLayoutType.Grid)
+                {
+                    return GetComponent<GridLayoutGroup>();
+                }
+
+                throw new InvalidOperationException("Cannot get GridLayoutGroup if widget does not have one!");
+            }
+        }
+
+        public HorizontalOrVerticalLayoutGroup HorizontalOrVerticalLayout
+        {
+            get
+            {
+                if (LayoutType == WidgetLayoutType.Horizontal || LayoutType == WidgetLayoutType.Vertical)
+                {
+                    return GetComponent<HorizontalOrVerticalLayoutGroup>();
+                }
+
+                throw new InvalidOperationException("Cannot get HorizontalOrVerticalLayoutGroup if widget does not have one!");
+            }
+        }
+
+        public HorizontalLayoutGroup HorizontalLayout
+        {
+            get
+            {
+                if (LayoutType == WidgetLayoutType.Horizontal)
+                {
+                    return GetComponent<HorizontalLayoutGroup>();
+                }
+
+                throw new InvalidOperationException("Cannot get HorizontalLayoutGroup if widget does not have one!");
+            }
+        }
+
+        public VerticalLayoutGroup VerticalLayout
+        {
+            get
+            {
+                if (LayoutType == WidgetLayoutType.Vertical)
+                {
+                    return GetComponent<VerticalLayoutGroup>();
+                }
+
+                throw new InvalidOperationException("Cannot get VerticalLayoutGroup if widget does not have one!");
+            }
+        }
+
+        public TextAnchor ChildAlignment
+        {
+            get { return Layout.childAlignment; }
+            set { Layout.childAlignment = value; }
         }
 
         public RectTransform RectTransform

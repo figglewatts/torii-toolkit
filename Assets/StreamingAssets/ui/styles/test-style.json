@@ -20,6 +20,10 @@
 			"b": 0,
 			"a": 1
 		},
-		"anchorType": "TopLeft"
+		"anchorType": "TopLeft",
+		"layoutElement": {
+			"minHeight": 100,
+			"preferredHeight": 100
+		}
 	}
 }
