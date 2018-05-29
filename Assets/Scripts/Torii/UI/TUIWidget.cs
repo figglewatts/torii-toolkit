@@ -21,6 +21,15 @@ namespace Torii.UI
 
         public TUIWidget Parent { get; protected set; }
 
+        public AbstractWidgetChildPopulator ChildPopulator { get; set; }
+
+        private readonly WriteOnce<TUIStyleSheet> _styleSheet = new WriteOnce<TUIStyleSheet>();
+        public TUIStyleSheet StyleSheet
+        {
+            get { return _styleSheet.Value; }
+            set { _styleSheet.Value = value; }
+        }
+
         public EventTrigger Events
         {
             get { return GetComponent<EventTrigger>(); }
@@ -277,6 +286,20 @@ namespace Torii.UI
             newEntry.eventID = type;
             newEntry.callback.AddListener(callback);
             Events.triggers.Add(newEntry);
+        }
+
+        public virtual void PopulateChildren()
+        {
+            if (ChildPopulator == null)
+            {
+                throw new InvalidOperationException("Cannot populate if widget does not have ChildPopulator!");
+            }
+
+            TUIWidget[] children = ChildPopulator.CreateChildren();
+            foreach (TUIWidget child in children)
+            {
+                AddChild(child);
+            }
         }
 
         public static TUIWidget Create(WidgetLayoutType layout, LayoutElementData element = null)

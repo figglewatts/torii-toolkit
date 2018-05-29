@@ -12,6 +12,26 @@
 		},
 		"anchorType": "TopLeft"
 	},
+	"container": {
+		"layoutType": "Vertical",
+		"color": {
+			"r": 1,
+			"g": 1,
+			"b": 1,
+			"a": 1
+		},
+		"anchorType": "TopLeft",
+		"childPopulator": {
+			"type": "Torii.UI.TestChildPopulator",
+			"properties": [
+				{
+					"type": "Integer",
+					"name": "NumberOfChildren",
+					"value": 3
+				}
+			]
+		}
+	},
 	"red": {
 		"layoutType": "Grid",
 		"color": {
@@ -50,7 +70,7 @@
 		"anchorType": "TopLeft",
 		"layoutElement": {
 			"minWidth": 100,
-			"minHeight": 100
+			"minHeight": 20
 		}
 	}
 }

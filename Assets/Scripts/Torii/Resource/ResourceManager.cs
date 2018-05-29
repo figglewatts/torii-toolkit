@@ -137,7 +137,7 @@ namespace Torii.Resource
                 // check to see if we loaded successfully
                 if (textAsset == null)
                 {
-                    throw new ResourceLoadException("Unable to load resource: '" + path + "'", typeof(T));
+                    throw new ToriiResourceLoadException("Unable to load resource: '" + path + "'", typeof(T));
                 }
                 
                 res = new Resource<T>(span)
@@ -159,7 +159,7 @@ namespace Torii.Resource
 
             if (res.Data == null)
             {
-                throw new ResourceLoadException("Unable to load resource: '" + path + "'", typeof(T));
+                throw new ToriiResourceLoadException("Unable to load resource: '" + path + "'", typeof(T));
             }
 
             _resources[resourcePath] = res;

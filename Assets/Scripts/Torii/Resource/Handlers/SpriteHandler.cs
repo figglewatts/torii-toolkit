@@ -23,7 +23,7 @@ namespace Torii.Resource.Handlers
             string type = sprite["type"].Value;
             if (!sprite["type"].Value.Equals("sprite"))
             {
-                throw new ResourceLoadException(
+                throw new ToriiResourceLoadException(
                     "Could not load resource: JSON type '" + sprite["type"] + "' did not match 'sprite'",
                     typeof(Sprite));
             }

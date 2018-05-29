@@ -9,7 +9,7 @@ namespace Torii.UI
 {
     public class TUIStyleSheet
     {
-        private Dictionary<string, TUIStyle> _classes;
+        private readonly Dictionary<string, TUIStyle> _classes;
 
         public TUIStyleSheet(JSONNode json)
         {
@@ -18,7 +18,7 @@ namespace Torii.UI
 
             foreach (string key in json.Keys)
             {
-                _classes[key] = new TUIStyle(json[key]);
+                _classes[key] = new TUIStyle(json[key], this, key);
             }
         }
 
@@ -37,7 +37,9 @@ namespace Torii.UI
                 style = _classes[widgetClass];
             }
 
-            return style.CreateWidget();
+            TUIWidget widget = style.CreateWidget();
+            widget.StyleSheet = this;
+            return widget;
         }
     }
 }

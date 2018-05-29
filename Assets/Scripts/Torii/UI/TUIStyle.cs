@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using SimpleJSON;
+using Torii.Exceptions;
 using Torii.Resource;
 using Torii.Util;
 using UnityEngine;
@@ -10,6 +12,8 @@ using UnityEngine.UI;
 
 namespace Torii.UI
 {
+    // TODO: change all EnumUtil.Parse to EnumUtil.TryParse with exception
+
     public class TUIStyle
     {
         protected string BackgroundGraphicPath { get; set; }
@@ -38,8 +42,19 @@ namespace Torii.UI
         protected bool LayoutChildExpandHeight { get; set; }
         protected float LayoutSpacing { get; set; }
 
-        public TUIStyle(JSONNode json)
+        // ChildPopulator styling
+        protected string ChildPopulatorTypeName { get; set; }
+        protected JSONArray ChildPopulatorProperties { get; set; }
+        protected AbstractWidgetChildPopulator ChildPopulatorInstance { get; set; }
+
+        protected TUIStyleSheet _parentSheet { get; set; }
+        protected string _className { get; set; }
+
+        public TUIStyle(JSONNode json, TUIStyleSheet sheet, string className)
         {
+            _parentSheet = sheet;
+            _className = className;
+
             string backgroundType =
                 json.GetValueOrDefault<JSONString>("backgroundType", WidgetBackgroundType.Sprite.ToString());
             BackgroundType = EnumUtil.Parse<WidgetBackgroundType>(backgroundType);
@@ -54,7 +69,7 @@ namespace Torii.UI
             JSONNode layoutElement = json["layoutElement"];
             LayoutElement = layoutElement == null ? null : new LayoutElementData(layoutElement);
 
-            Pivot = json.GetValueOrDefault<JSONNode>("pivot", new Vector2(0.5f, 0.5f));
+            Pivot = json.GetValueOrDefault<JSONNode>("pivot", new Vector2(0, 1));
 
             Color = json.GetValueOrDefault<JSONNode>("color", UnityEngine.Color.white);
 
@@ -94,6 +109,14 @@ namespace Torii.UI
                 LayoutChildExpandWidth = layoutNode.GetValueOrDefault<JSONBool>("childExpandWidth", true);
                 LayoutChildExpandHeight = layoutNode.GetValueOrDefault<JSONBool>("childExpandHeight", true);
                 LayoutSpacing = json.GetValueOrDefault<JSONNumber>("layoutSpacing", 0);
+            }
+
+            JSONNode childPopulator = json.GetValueOrDefault<JSONNode>("childPopulator", null);
+            if (childPopulator != null)
+            {
+                ChildPopulatorTypeName = childPopulator.GetValueOrDefault<JSONString>("type", string.Empty);
+                ChildPopulatorProperties = childPopulator.GetValueOrDefault<JSONArray>("properties", null);
+                ChildPopulatorInstance = loadChildPopulator();
             }
         }
 
@@ -164,7 +187,155 @@ namespace Torii.UI
                 widget.HorizontalOrVerticalLayout.spacing = LayoutSpacing;
             }
 
+            if (ChildPopulatorInstance != null)
+            {
+                widget.ChildPopulator = ChildPopulatorInstance;
+            }
+
             return widget;
+        }
+
+        private AbstractWidgetChildPopulator loadChildPopulator()
+        {
+            Type populatorType = Type.GetType(ChildPopulatorTypeName, true);
+
+            // check to see if the type inherits from abstract base class
+            if (!populatorType.IsSubclassOf(typeof(AbstractWidgetChildPopulator)))
+            {
+                throw new ToriiException("In style class '" + _className + "': ChildPopulator " +
+                                                    populatorType + " must inherit from " +
+                                                    typeof(AbstractWidgetChildPopulator));
+            }
+
+            AbstractWidgetChildPopulator populator =
+                (AbstractWidgetChildPopulator)Activator.CreateInstance(populatorType, _parentSheet);
+
+            if (ChildPopulatorProperties != null)
+            {
+                foreach (JSONObject property in ChildPopulatorProperties)
+                {
+                    setPopulatorProperty(property, populator, populatorType);
+                }
+            }
+
+            return populator;
+        }
+
+        private void setPopulatorProperty(JSONObject property, AbstractWidgetChildPopulator populator, Type populatorType)
+        {
+            string name = property["name"];
+            string typeValue = property["type"];
+            JSONNode value = property["value"];
+
+            if (name == null || typeValue == null || value == null)
+            {
+                throw new ToriiException("In style class '" + _className + "': A property in populator " +
+                                                    populatorType + " is malformed!");
+            }
+
+            PopulatorPropertyType type;
+            if (!EnumUtil.TryParse(typeValue, out type))
+            {
+                throw new ToriiException("In style class '" + _className + "': Populator property type " +
+                                         typeValue + " is not a valid type.");
+            }
+
+            // check if the property could not be found
+            PropertyInfo prop = populatorType.GetProperty(name);
+            if (prop == null)
+            {
+                Debug.LogWarningFormat(
+                    "In style class '" + _className +
+                    "': Could not set property {0}, no matching property found in Type {1}", name,
+                    populatorType);
+                return;
+            }
+
+            try
+            {
+                switch (type)
+                {
+                    case PopulatorPropertyType.Boolean:
+                    {
+                        setPopulatorBooleanProperty(populator, prop, value);
+                        break;
+                    }
+                    case PopulatorPropertyType.Float:
+                    {
+                        setPopulatorFloatProperty(populator, prop, value);
+                        break;
+                    }
+                    case PopulatorPropertyType.Integer:
+                    {
+                        setPopulatorIntProperty(populator, prop, value);
+                        break;
+                    }
+                    case PopulatorPropertyType.String:
+                    {
+                        setPopulatorStringProperty(populator, prop, value);
+                        break;
+                    }
+                }
+            }
+            catch (ArgumentException e)
+            {
+                throw new ToriiException(
+                    "In style class '" + _className + "': Could not set property, non matching type!", e);
+            }
+            catch (MethodAccessException e)
+            {
+                throw new ToriiException(
+                    "In style class '" + _className + "': Could not set property, property is not public!", e);
+            }
+            catch (TargetInvocationException e)
+            {
+                throw new ToriiException(
+                    "In style class '" + _className + "': Could not set property!", e);
+            }
+        }
+
+        private void setPopulatorBooleanProperty(AbstractWidgetChildPopulator populator, PropertyInfo prop,
+            JSONNode value)
+        {
+            if (!value.IsBoolean)
+            {
+                throw new ArgumentException("Boolean value was not boolean!");
+            }
+
+            prop.SetValue(populator, value.AsBool, null);
+        }
+
+        private void setPopulatorFloatProperty(AbstractWidgetChildPopulator populator, PropertyInfo prop,
+            JSONNode value)
+        {
+            if (!value.IsNumber)
+            {
+                throw new ArgumentException("Float value was not number!");
+            }
+
+            prop.SetValue(populator, value.AsFloat, null);
+        }
+
+        private void setPopulatorIntProperty(AbstractWidgetChildPopulator populator, PropertyInfo prop,
+            JSONNode value)
+        {
+            if (!value.IsNumber)
+            {
+                throw new ArgumentException("Integer value was not number!");
+            }
+
+            prop.SetValue(populator, value.AsInt, null);
+        }
+
+        private void setPopulatorStringProperty(AbstractWidgetChildPopulator populator, PropertyInfo prop,
+            JSONNode value)
+        {
+            if (!value.IsString)
+            {
+                throw new ArgumentException("String value was not string!");
+            }
+
+            prop.SetValue(populator, value.Value, null);
         }
     }
 }
