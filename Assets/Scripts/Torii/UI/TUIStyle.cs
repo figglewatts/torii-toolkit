@@ -14,6 +14,8 @@ namespace Torii.UI
 {
     // TODO: change all EnumUtil.Parse to EnumUtil.TryParse with exception
 
+    // TODO: a more robust serialization/deserialization solution... (newtonsoft json??)
+
     public class TUIStyle
     {
         protected string BackgroundGraphicPath { get; set; }
@@ -57,14 +59,14 @@ namespace Torii.UI
 
             string backgroundType =
                 json.GetValueOrDefault<JSONString>("backgroundType", WidgetBackgroundType.Sprite.ToString());
-            BackgroundType = EnumUtil.Parse<WidgetBackgroundType>(backgroundType);
+            BackgroundType = parseEnumWithException<WidgetBackgroundType>(backgroundType, "backgroundType");
 
             BackgroundGraphicPath = json["backgroundGraphic"];
 
             UseStreamingAssets = json.GetValueOrDefault<JSONBool>("streamingAssets", true);
 
             string layoutType = json.GetValueOrDefault<JSONString>("layoutType", WidgetLayoutType.None.ToString());
-            LayoutType = EnumUtil.Parse<WidgetLayoutType>(layoutType);
+            LayoutType = parseEnumWithException<WidgetLayoutType>(layoutType, "layoutType");
 
             JSONNode layoutElement = json["layoutElement"];
             LayoutElement = layoutElement == null ? null : new LayoutElementData(layoutElement);
@@ -74,12 +76,12 @@ namespace Torii.UI
             Color = json.GetValueOrDefault<JSONNode>("color", UnityEngine.Color.white);
 
             string anchorType = json.GetValueOrDefault<JSONString>("anchorType", AnchorType.TopLeft.ToString());
-            Anchor = EnumUtil.Parse<AnchorType>(anchorType);
+            Anchor = parseEnumWithException<AnchorType>(anchorType, "anchorType");
 
             Padding = json.GetValueOrDefault<JSONNode>("padding", new RectOffset(0, 0, 0, 0));
 
             string childAlignment = json.GetValueOrDefault<JSONString>("childAlignment", "UpperLeft");
-            ChildAlignment = EnumUtil.Parse<TextAnchor>(childAlignment);
+            ChildAlignment = parseEnumWithException<TextAnchor>(childAlignment, "childAlignment");
 
             if (LayoutType == WidgetLayoutType.Grid)
             {
@@ -88,15 +90,17 @@ namespace Torii.UI
                 GridCellSize = gridLayoutNode.GetValueOrDefault<JSONNode>("cellSize", new Vector2(100, 100));
 
                 string gridConstraint = gridLayoutNode.GetValueOrDefault<JSONString>("constraint", "Flexible");
-                GridConstraint = EnumUtil.Parse<GridLayoutGroup.Constraint>(gridConstraint);
+                GridConstraint =
+                    parseEnumWithException<GridLayoutGroup.Constraint>(gridConstraint, "gridLayout.constraint");
 
                 GridConstraintCount = gridLayoutNode.GetValueOrDefault<JSONNumber>("constraintCount", 1);
 
                 string gridStartAxis = gridLayoutNode.GetValueOrDefault<JSONString>("startAxis", "Horizontal");
-                GridStartAxis = EnumUtil.Parse<GridLayoutGroup.Axis>(gridStartAxis);
+                GridStartAxis = parseEnumWithException<GridLayoutGroup.Axis>(gridStartAxis, "gridLayout.startAxis");
 
                 string gridStartCorner = gridLayoutNode.GetValueOrDefault<JSONString>("startCorner", "UpperLeft");
-                GridStartCorner = EnumUtil.Parse<GridLayoutGroup.Corner>(gridStartCorner);
+                GridStartCorner =
+                    parseEnumWithException<GridLayoutGroup.Corner>(gridStartCorner, "gridLayout.startCorner");
 
                 GridLayoutSpacing = gridLayoutNode.GetValueOrDefault<JSONNode>("layoutSpacing", Vector2.zero);
             }
@@ -336,6 +340,18 @@ namespace Torii.UI
             }
 
             prop.SetValue(populator, value.Value, null);
+        }
+
+        private T parseEnumWithException<T>(string enumValue, string enumKey)
+        {
+            T enumType;
+            if (!EnumUtil.TryParse(enumValue, out enumType))
+            {
+                throw new ToriiException("In style class '" + _className + "': " + enumKey + " value " +
+                                         enumValue + " is invalid.");
+            }
+
+            return enumType;
         }
     }
 }
