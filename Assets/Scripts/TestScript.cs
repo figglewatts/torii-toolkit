@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using SimpleJSON;
 using Torii;
+using Torii.Binding;
 using Torii.Resource;
 using Torii.UI;
 using Torii.Util;
@@ -30,6 +31,15 @@ public class TestScript : MonoBehaviour {
 	    container.VerticalLayout.spacing = 20;
 
         container.PopulateChildren();
+
+	    float test = 0;
+	    ModelTest testModel = gameObject.AddComponent<ModelTest>();
+        BindBrokerTest testBroker = new BindBrokerTest(testModel);
+        testBroker.Bind("AFloat", () => test);
+
+	    testModel.AFloat = 3.4f;
+
+        Debug.Log(test);
 	}
 
     // Update is called once per frame
