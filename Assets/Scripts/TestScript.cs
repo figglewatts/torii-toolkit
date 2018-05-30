@@ -35,7 +35,7 @@ public class TestScript : MonoBehaviour {
 	    float test = 0;
 	    ModelTest testModel = gameObject.AddComponent<ModelTest>();
         BindBrokerTest testBroker = new BindBrokerTest(testModel);
-        testBroker.Bind("AFloat", () => test);
+        testBroker.Bind(nameof(testModel.AFloat), () => test);
 
 	    testModel.AFloat = 3.4f;
 
