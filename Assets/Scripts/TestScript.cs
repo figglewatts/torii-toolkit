@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using SimpleJSON;
 using Torii;
 using Torii.Binding;
@@ -35,12 +36,13 @@ public class TestScript : MonoBehaviour {
 	    float test = 0;
 	    ModelTest testModel = gameObject.AddComponent<ModelTest>();
         BindBrokerTest testBroker = new BindBrokerTest(testModel);
-        testBroker.Bind(nameof(testModel.AFloat), () => test);
+        testBroker.Bind(() => testModel.AFloat, () => test, BindingType.OneWay);
 
 	    testModel.AFloat = 3.4f;
 
         Debug.Log(test);
-	}
+
+    }
 
     // Update is called once per frame
 	void Update () {

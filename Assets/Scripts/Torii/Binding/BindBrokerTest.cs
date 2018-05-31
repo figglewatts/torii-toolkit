@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Torii.Binding
 {
-    public class BindBrokerTest : AbstractBindBroker<ModelTest>
+    public class BindBrokerTest : AbstractBindBroker
     {
         public BindBrokerTest(ModelTest test)
         {
