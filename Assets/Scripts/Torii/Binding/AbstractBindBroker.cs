@@ -32,8 +32,13 @@ namespace Torii.Binding
             string propertyReference = makePropertyReference(instance.GUID, propertyName);
             if (_bindings.TryGetValue(propertyReference, out binding))
             {
+                // check to see if we're in some kind of change loop
                 if (_lastChangeHandled.Equals(binding.TargetReference))
                 {
+                    // lastChangeHandled stores the property reference of the last bind,
+                    // so if this matches the target of the current bind then we don't want
+                    // to bind as it would create a loop and a stack overflow
+                    _lastChangeHandled = "";
                     return;
                 }
                 _lastChangeHandled = propertyReference;
@@ -41,6 +46,9 @@ namespace Torii.Binding
             }
         }
 
+        // a property reference is the GUID of the class instance the property is from coupled with the property name
+        // they are separated by a '.' -- a property reference allows the bind broker to recognise which changes come
+        // from what instance
         private string makePropertyReference(Guid instance, string propertyName)
         {
             return instance.ToString() + "." + propertyName;

@@ -51,7 +51,12 @@ public class TestScript : MonoBehaviour {
 
         Debug.Log("binder: " + testModel.AFloat);
         Debug.Log("bindee: " + testView.AnotherOne);
-	}
+
+	    testModel.AFloat = 667;
+
+	    Debug.Log("binder: " + testModel.AFloat);
+	    Debug.Log("bindee: " + testView.AnotherOne);
+    }
 
     // Update is called once per frame
 	void Update () {
