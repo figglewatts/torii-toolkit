@@ -7,9 +7,10 @@ namespace Torii.Binding
 {
     public class BindBrokerTest : AbstractBindBroker
     {
-        public BindBrokerTest(ModelTest test)
+        public BindBrokerTest(ModelTest test, ViewTest view)
         {
-            registerModel(test);
+            registerData(test);
+            registerData(view);
         }
     }
 }

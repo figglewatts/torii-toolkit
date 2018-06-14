@@ -2,37 +2,36 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Torii.Binding.Attributes;
-using UnityEngine;
+using System.Threading.Tasks;
 
 namespace Torii.Binding
 {
-    public class ModelTest : MonoBehaviour, IPropertyWatcher
+    public class ViewTest : IPropertyWatcher
     {
-        private float _aFloat;
+        private float _anotherOne;
 
-        public float AFloat
+        public float AnotherOne
         {
-            get { return _aFloat; }
+            get { return _anotherOne; }
             set
             {
-                _aFloat = value;
-                NotifyPropertyChange(nameof(AFloat));
+                _anotherOne = value;
+                NotifyPropertyChange(nameof(AnotherOne));
             }
         }
 
         public event Action<string, IPropertyWatcher> OnPropertyChange;
-
-        public Guid GUID { get; private set; }
+        public Guid GUID { get; }
 
         public void NotifyPropertyChange(string propertyName)
         {
             OnPropertyChange?.Invoke(propertyName, this);
         }
 
-        void Awake()
+        public ViewTest(float val)
         {
             GUID = Guid.NewGuid();
+            _anotherOne = val;
         }
     }
 }

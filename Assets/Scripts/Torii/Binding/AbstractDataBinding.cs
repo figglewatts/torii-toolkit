@@ -8,22 +8,14 @@ namespace Torii.Binding
 {
     public abstract class AbstractDataBinding
     {
-        protected Delegate _setBindeeToBinder;
-        protected Delegate _setBinderToBindee;
-        public BindingType BindingType { get; protected set; }
+        protected Delegate _bind;
+        public string TargetReference { get; }
 
-        public abstract void Invoke(DataBindDirection direction);
-    }
+        public abstract void Invoke();
 
-    public enum DataBindDirection
-    {
-        BindeeToBinder,
-        BinderToBindee
-    }
-
-    public enum BindingType
-    {
-        OneWay,
-        TwoWay
+        protected AbstractDataBinding(string targetReference)
+        {
+            TargetReference = targetReference;
+        }
     }
 }
