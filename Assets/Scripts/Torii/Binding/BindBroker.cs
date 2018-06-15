@@ -11,38 +11,61 @@ using UnityEngine;
 
 namespace Torii.Binding
 {
-    public abstract class AbstractBindBroker
+    public enum BindingType
     {
-        protected Dictionary<string, AbstractDataBinding> _bindings;
+        OneWay,
+        TwoWay
+    }
+
+    public class BindBroker
+    {
+        protected Dictionary<string, List<AbstractDataBinding>> _bindings;
         private string _lastChangeHandled = "";
 
-        protected AbstractBindBroker()
+        public BindBroker()
         {
-            _bindings = new Dictionary<string, AbstractDataBinding>();
+            _bindings = new Dictionary<string, List<AbstractDataBinding>>();
         }
 
-        protected void registerData(IPropertyWatcher watcher)
+        public void RegisterData(IPropertyWatcher watcher)
         {
             watcher.OnPropertyChange += handleChange;
         }
 
         private void handleChange(string propertyName, IPropertyWatcher instance)
         {
-            AbstractDataBinding binding;
+            List<AbstractDataBinding> bindingList;
             string propertyReference = makePropertyReference(instance.GUID, propertyName);
-            if (_bindings.TryGetValue(propertyReference, out binding))
+            if (_bindings.TryGetValue(propertyReference, out bindingList))
             {
-                // check to see if we're in some kind of change loop
-                if (_lastChangeHandled.Equals(binding.TargetReference))
+                foreach (var binding in bindingList)
                 {
-                    // lastChangeHandled stores the property reference of the last bind,
-                    // so if this matches the target of the current bind then we don't want
-                    // to bind as it would create a loop and a stack overflow
-                    _lastChangeHandled = "";
-                    return;
+                    // check to see if we're in some kind of change loop
+                    if (_lastChangeHandled.Equals(binding.TargetReference))
+                    {
+                        // lastChangeHandled stores the property reference of the last bind,
+                        // so if this matches the target of the current bind then we don't want
+                        // to bind as it would create a loop and a stack overflow
+                        _lastChangeHandled = "";
+                        return;
+                    }
+
+                    _lastChangeHandled = propertyReference;
+                    binding.Invoke();
                 }
-                _lastChangeHandled = propertyReference;
-                binding.Invoke();
+            }
+        }
+
+        private void createBinding(string reference, AbstractDataBinding binding)
+        {
+            List<AbstractDataBinding> bindingList;
+            if (_bindings.TryGetValue(reference, out bindingList))
+            {
+                bindingList.Add(binding);
+            }
+            else
+            {
+                _bindings[reference] = new List<AbstractDataBinding>(new [] { binding });
             }
         }
 
@@ -65,20 +88,14 @@ namespace Torii.Binding
             string bindeeReference = makePropertyReference(bindeeInstance.GUID, bindeeMemberExp.Member.Name);
 
             DataBinding<TType> binding = new DataBinding<TType>(binder, bindee, bindeeReference);
-            _bindings[binderReference] = binding;
+            createBinding(binderReference, binding);
 
             if (bindingType == BindingType.TwoWay)
             {
                 DataBinding<TType> oppositeBinding = new DataBinding<TType>(bindee, binder, binderReference);
-                _bindings[bindeeReference] = oppositeBinding;
+                createBinding(bindeeReference, binding);
 
             }
-        }
-
-        public enum BindingType
-        {
-            OneWay,
-            TwoWay
         }
     }
 }

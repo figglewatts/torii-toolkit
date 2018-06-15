@@ -37,25 +37,6 @@ public class TestScript : MonoBehaviour {
 	    ModelTest testModel = gameObject.AddComponent<ModelTest>();
 
         Debug.Log(testModel.GUID);
-
-        BindBrokerTest testBroker = new BindBrokerTest(testModel, testView);
-
-	    Debug.Log("binder: " + testModel.AFloat);
-	    Debug.Log("bindee: " + testView.AnotherOne);
-
-        testBroker.Bind(() => testModel.AFloat, () => testView.AnotherOne, AbstractBindBroker.BindingType.TwoWay);
-        Debug.Log("Bound");
-
-	    //testModel.AFloat = 3.4f;
-	    testView.AnotherOne = 666;
-
-        Debug.Log("binder: " + testModel.AFloat);
-        Debug.Log("bindee: " + testView.AnotherOne);
-
-	    testModel.AFloat = 667;
-
-	    Debug.Log("binder: " + testModel.AFloat);
-	    Debug.Log("bindee: " + testView.AnotherOne);
     }
 
     // Update is called once per frame
