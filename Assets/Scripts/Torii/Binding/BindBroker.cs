@@ -19,8 +19,8 @@ namespace Torii.Binding
 
     public class BindBroker
     {
-        protected Dictionary<string, List<AbstractDataBinding>> _bindings;
-        private Stack<string> _changesBeingHandled;
+        private readonly Dictionary<string, List<AbstractDataBinding>> _bindings;
+        private readonly Stack<string> _changesBeingHandled;
 
         public BindBroker()
         {
@@ -28,9 +28,29 @@ namespace Torii.Binding
             _changesBeingHandled = new Stack<string>();
         }
 
-        public void RegisterData(IPropertyWatcher watcher)
+        public void RegisterData(IPropertyWatcher watcher) { watcher.OnPropertyChange += handleChange; }
+
+        public void DeregisterData(IPropertyWatcher watcher) { watcher.OnPropertyChange -= handleChange; }
+
+        public void Bind<TType>(Expression<Func<TType>> binder, Expression<Func<TType>> bindee, BindingType bindingType)
         {
-            watcher.OnPropertyChange += handleChange;
+            var binderMemberExp = (MemberExpression)binder.Body;
+            IPropertyWatcher binderInstance = Expression.Lambda<Func<IPropertyWatcher>>(binderMemberExp.Expression).Compile()();
+            string binderReference = makePropertyReference(binderInstance.GUID, binderMemberExp.Member.Name);
+
+            var bindeeMemberExp = (MemberExpression)bindee.Body;
+            IPropertyWatcher bindeeInstance = Expression.Lambda<Func<IPropertyWatcher>>(bindeeMemberExp.Expression).Compile()();
+            string bindeeReference = makePropertyReference(bindeeInstance.GUID, bindeeMemberExp.Member.Name);
+
+            DataBinding<TType> binding = new DataBinding<TType>(binder, bindee, bindeeReference);
+            createBinding(binderReference, binding);
+
+            if (bindingType == BindingType.TwoWay)
+            {
+                DataBinding<TType> oppositeBinding = new DataBinding<TType>(bindee, binder, binderReference);
+                createBinding(bindeeReference, oppositeBinding);
+
+            }
         }
 
         private void handleChange(string propertyName, IPropertyWatcher instance)
@@ -80,27 +100,6 @@ namespace Torii.Binding
         private string makePropertyReference(Guid instance, string propertyName)
         {
             return instance.ToString() + "." + propertyName;
-        }
-        
-        public void Bind<TType>(Expression<Func<TType>> binder, Expression<Func<TType>> bindee, BindingType bindingType)
-        {
-            var binderMemberExp = (MemberExpression)binder.Body;
-            IPropertyWatcher binderInstance = Expression.Lambda<Func<IPropertyWatcher>>(binderMemberExp.Expression).Compile()();
-            string binderReference = makePropertyReference(binderInstance.GUID, binderMemberExp.Member.Name);
-
-            var bindeeMemberExp = (MemberExpression)bindee.Body;
-            IPropertyWatcher bindeeInstance = Expression.Lambda<Func<IPropertyWatcher>>(bindeeMemberExp.Expression).Compile()();
-            string bindeeReference = makePropertyReference(bindeeInstance.GUID, bindeeMemberExp.Member.Name);
-
-            DataBinding<TType> binding = new DataBinding<TType>(binder, bindee, bindeeReference);
-            createBinding(binderReference, binding);
-
-            if (bindingType == BindingType.TwoWay)
-            {
-                DataBinding<TType> oppositeBinding = new DataBinding<TType>(bindee, binder, binderReference);
-                createBinding(bindeeReference, oppositeBinding);
-
-            }
         }
     }
 }

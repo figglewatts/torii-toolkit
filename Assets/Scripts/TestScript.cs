@@ -7,6 +7,7 @@ using Torii;
 using Torii.Binding;
 using Torii.Resource;
 using Torii.UI;
+using Torii.UI.Widgets;
 using Torii.Util;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -21,22 +22,12 @@ public class TestScript : MonoBehaviour {
 
 	void Start ()
 	{
-	    TUIStyleSheet sheet =
-	        ResourceManager.Load<TUIStyleSheet>(Application.streamingAssetsPath + "/ui/styles/test-style.json");
-
-	    TUIWidget container = sheet.CreateWidget("container");
-	    TUICanvas.Instance.AddWidget(container);
-        container.Anchor = AnchorType.HStretchTop;
-        container.Size = new Vector2(container.Size.x, 500);
-	    container.Position = Vector2.zero;
-	    container.VerticalLayout.spacing = 20;
-
-        container.PopulateChildren();
-        
-	    ViewTest testView = new ViewTest(69);
-	    ModelTest testModel = gameObject.AddComponent<ModelTest>();
-
-        Debug.Log(testModel.GUID);
+	    TUILabel label = TUILabel.Create("Test text", new TUILabelSettings
+	    {
+            FontSize = 48
+	    });
+	    TUICanvas.Instance.AddWidget(label);
+        label.Size = new Vector2(600, 200);
     }
 
     // Update is called once per frame

@@ -10,6 +10,7 @@ using Torii.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 namespace Torii.UI
 {
     // TODO: change all EnumUtil.Parse to EnumUtil.TryParse with exception
@@ -18,6 +19,7 @@ namespace Torii.UI
 
     public class TUIStyle
     {
+        /*
         protected string BackgroundGraphicPath { get; set; }
         protected bool UseStreamingAssets { get; set; }
         protected WidgetLayoutType LayoutType { get; set; }
@@ -352,6 +354,6 @@ namespace Torii.UI
             }
 
             return enumType;
-        }
+        }*/
     }
 }

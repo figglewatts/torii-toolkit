@@ -18,16 +18,17 @@ namespace Torii.Resource.Handlers
 
         public void Load(string path, int span)
         {
-            JSONNode styleSheetJson = JSONUtil.ReadJSONFromDisk(path);
+            /*JSONNode styleSheetJson = JSONUtil.ReadJSONFromDisk(path);
             TUIStyleSheet sheet = new TUIStyleSheet(styleSheetJson);
             Resource<TUIStyleSheet> resource = new Resource<TUIStyleSheet>(sheet, span);
-            ResourceManager.RegisterResource(path, resource);
+            ResourceManager.RegisterResource(path, resource);*/
         }
 
         public object Process(TextAsset textAsset)
         {
-            JSONNode stylesheetJson = JSON.Parse(textAsset.text);
-            return new TUIStyleSheet(stylesheetJson);
+            /*JSONNode stylesheetJson = JSON.Parse(textAsset.text);
+            return new TUIStyleSheet(stylesheetJson);*/
+            return null;
         }
     }
 }

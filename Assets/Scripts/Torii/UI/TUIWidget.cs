@@ -14,14 +14,7 @@ namespace Torii.UI
 {
     public class TUIWidget : MonoBehaviour
     {
-        public LayoutElement Element { get; protected set; }
-
-        public WidgetLayoutType LayoutType { get; protected set; }
-        public WidgetBackgroundType BackgroundType { get; protected set; }
-
         public TUIWidget Parent { get; protected set; }
-
-        public AbstractWidgetChildPopulator ChildPopulator { get; set; }
 
         private readonly WriteOnce<TUIStyleSheet> _styleSheet = new WriteOnce<TUIStyleSheet>();
         public TUIStyleSheet StyleSheet
@@ -33,98 +26,6 @@ namespace Torii.UI
         public EventTrigger Events
         {
             get { return GetComponent<EventTrigger>(); }
-        }
-
-        public Graphic Background
-        {
-            get
-            {
-                switch (BackgroundType)
-                {
-                    case WidgetBackgroundType.Sprite:
-                        return GetComponent<Image>();
-                    case WidgetBackgroundType.Texture:
-                        return GetComponent<RawImage>();
-                    default:
-                        return GetComponent<Image>(); // Image is used without a Sprite to display color
-                }
-            }
-        }
-
-        public LayoutGroup Layout
-        {
-            get
-            {
-                switch (LayoutType)
-                {
-                    case WidgetLayoutType.Grid:
-                        return GetComponent<GridLayoutGroup>();
-                    case WidgetLayoutType.Horizontal:
-                        return GetComponent<HorizontalLayoutGroup>();
-                    case WidgetLayoutType.Vertical:
-                        return GetComponent<VerticalLayoutGroup>();
-                    default:
-                        throw new InvalidOperationException("Cannot get LayoutGroup if widget has no layout component!");
-                }
-            }
-        }
-
-        public GridLayoutGroup GridLayout
-        {
-            get
-            {
-                if (LayoutType == WidgetLayoutType.Grid)
-                {
-                    return GetComponent<GridLayoutGroup>();
-                }
-
-                throw new InvalidOperationException("Cannot get GridLayoutGroup if widget does not have one!");
-            }
-        }
-
-        public HorizontalOrVerticalLayoutGroup HorizontalOrVerticalLayout
-        {
-            get
-            {
-                if (LayoutType == WidgetLayoutType.Horizontal || LayoutType == WidgetLayoutType.Vertical)
-                {
-                    return GetComponent<HorizontalOrVerticalLayoutGroup>();
-                }
-
-                throw new InvalidOperationException("Cannot get HorizontalOrVerticalLayoutGroup if widget does not have one!");
-            }
-        }
-
-        public HorizontalLayoutGroup HorizontalLayout
-        {
-            get
-            {
-                if (LayoutType == WidgetLayoutType.Horizontal)
-                {
-                    return GetComponent<HorizontalLayoutGroup>();
-                }
-
-                throw new InvalidOperationException("Cannot get HorizontalLayoutGroup if widget does not have one!");
-            }
-        }
-
-        public VerticalLayoutGroup VerticalLayout
-        {
-            get
-            {
-                if (LayoutType == WidgetLayoutType.Vertical)
-                {
-                    return GetComponent<VerticalLayoutGroup>();
-                }
-
-                throw new InvalidOperationException("Cannot get VerticalLayoutGroup if widget does not have one!");
-            }
-        }
-
-        public TextAnchor ChildAlignment
-        {
-            get { return Layout.childAlignment; }
-            set { Layout.childAlignment = value; }
         }
 
         public RectTransform RectTransform
@@ -238,22 +139,6 @@ namespace Torii.UI
             }
         }
 
-        public Color Color
-        {
-            get { return Background.color; }
-            set { Background.color = value; }
-        }
-
-        public RectOffset Padding
-        {
-            get { return LayoutType == WidgetLayoutType.None ? null : Layout.padding; }
-            set
-            {
-                if (LayoutType == WidgetLayoutType.None) return;
-                Layout.padding = value;
-            }
-        }
-
         public TUIWidget[] Children
         {
             get { return this.GetComponentsInChildrenNonRecursive<TUIWidget>(); }
@@ -288,112 +173,15 @@ namespace Torii.UI
             Events.triggers.Add(newEntry);
         }
 
-        public virtual void PopulateChildren()
+        public static TUIWidget Create(LayoutElementData element = null)
         {
-            if (ChildPopulator == null)
-            {
-                throw new InvalidOperationException("Cannot populate if widget does not have ChildPopulator!");
-            }
-
-            TUIWidget[] children = ChildPopulator.CreateChildren();
-            foreach (TUIWidget child in children)
-            {
-                AddChild(child);
-            }
+            return createBaseWidget<TUIWidget>(element);
         }
 
-        public static TUIWidget Create(WidgetLayoutType layout, LayoutElementData element = null)
-        {
-            return createBaseWidget(layout, WidgetBackgroundType.Sprite, element);
-        }
-
-        public static TUIWidget Create(WidgetLayoutType layout, Color background, LayoutElementData element = null)
-        {
-            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Sprite, element);
-            widget.GetComponent<TUIWidget>().Color = background;
-            return widget;
-        }
-
-        public static TUIWidget Create(WidgetLayoutType layout, Sprite background, LayoutElementData element = null)
-        {
-            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Sprite, element);
-            Image uiImage = widget.GetComponent<Image>();
-            uiImage.sprite = background;
-            if (uiImage.sprite.HasBorder())
-            {
-                uiImage.type = Image.Type.Tiled;
-            }
-
-            return widget;
-        }
-
-        public static TUIWidget Create(WidgetLayoutType layout, Texture2D background, LayoutElementData element = null)
-        {
-            TUIWidget widget = createBaseWidget(layout, WidgetBackgroundType.Texture, element);
-            widget.GetComponent<RawImage>().texture = background;
-            return widget;
-        }
-
-        public static TUIWidget Create(WidgetLayoutType layout, WidgetBackgroundType background, string path, bool streamingAssets = true, LayoutElementData element = null)
-        {
-            path = PathUtil.Combine(streamingAssets ? TUI.UIUserDataDirectory : TUI.UIDataDirectory, path);
-
-            switch (background)
-            {
-                case WidgetBackgroundType.Sprite:
-                {
-                    var backgroundSprite = streamingAssets
-                        ? ResourceManager.Load<Sprite>(path)
-                        : ResourceManager.UnityLoad<Sprite>(path);
-
-                    return Create(layout, backgroundSprite, element);
-                }
-                case WidgetBackgroundType.Texture:
-                {
-                    var backgroundTex = streamingAssets
-                        ? ResourceManager.Load<Texture2D>(path)
-                        : ResourceManager.UnityLoad<Texture2D>(path);
-                        return Create(layout, backgroundTex, element);
-                }
-                default:
-                    throw new ArgumentOutOfRangeException("background", background, "Background type not found!");
-            }
-        }
-
-        protected static TUIWidget createBaseWidget(WidgetLayoutType layout, WidgetBackgroundType background, LayoutElementData element)
+        protected static T createBaseWidget<T>(LayoutElementData element) where T : TUIWidget
         {
             GameObject obj = new GameObject("TUIWidget");
             obj.layer |= LayerMask.NameToLayer("UI");
-
-            switch (layout)
-            {
-                case WidgetLayoutType.Grid:
-                    obj.AddComponent<GridLayoutGroup>();
-                    break;
-                case WidgetLayoutType.Horizontal:
-                    obj.AddComponent<HorizontalLayoutGroup>();
-                    break;
-                case WidgetLayoutType.Vertical:
-                    obj.AddComponent<VerticalLayoutGroup>();
-                    break;
-                case WidgetLayoutType.None:
-                    // intentionally empty
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("layout", layout, "Layout type not found!");
-            }
-            
-            switch (background)
-            {
-                case WidgetBackgroundType.Sprite:
-                    obj.AddComponent<Image>();
-                    break;
-                case WidgetBackgroundType.Texture:
-                    obj.AddComponent<RawImage>();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("background", background, "Background type not found!");
-            }
 
             if (element != null)
             {
@@ -402,31 +190,15 @@ namespace Torii.UI
             }
 
             obj.AddComponent<EventTrigger>();
+            obj.AddComponent<RectTransform>();
 
-            TUIWidget widget = obj.AddComponent<TUIWidget>();
-            widget.LayoutType = layout;
-            widget.BackgroundType = background;
+            T widget = obj.AddComponent<T>();
             widget.Anchor = AnchorType.TopLeft;
             widget.Position = Vector2.zero;
             widget.Pivot = new Vector2(0, 1);
-            widget.Color = Color.white;
 
             return widget;
         }
-    }
-
-    public enum WidgetLayoutType
-    {
-        Grid,
-        Horizontal,
-        Vertical,
-        None
-    }
-
-    public enum WidgetBackgroundType
-    {
-        Sprite,
-        Texture
     }
 
     public enum AnchorType
