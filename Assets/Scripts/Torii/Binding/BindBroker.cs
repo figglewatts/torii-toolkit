@@ -20,11 +20,12 @@ namespace Torii.Binding
     public class BindBroker
     {
         protected Dictionary<string, List<AbstractDataBinding>> _bindings;
-        private string _lastChangeHandled = "";
+        private Stack<string> _changesBeingHandled;
 
         public BindBroker()
         {
             _bindings = new Dictionary<string, List<AbstractDataBinding>>();
+            _changesBeingHandled = new Stack<string>();
         }
 
         public void RegisterData(IPropertyWatcher watcher)
@@ -36,23 +37,27 @@ namespace Torii.Binding
         {
             List<AbstractDataBinding> bindingList;
             string propertyReference = makePropertyReference(instance.GUID, propertyName);
+
             if (_bindings.TryGetValue(propertyReference, out bindingList))
             {
+                // we're now handling this change, add it to the stack
+                _changesBeingHandled.Push(propertyReference);
+
                 foreach (var binding in bindingList)
                 {
-                    // check to see if we're in some kind of change loop
-                    if (_lastChangeHandled.Equals(binding.TargetReference))
+
+                    if (_changesBeingHandled.Contains(binding.TargetReference))
                     {
-                        // lastChangeHandled stores the property reference of the last bind,
-                        // so if this matches the target of the current bind then we don't want
-                        // to bind as it would create a loop and a stack overflow
-                        _lastChangeHandled = "";
-                        return;
+                        // the target of this change is one that we've already handled,
+                        // so it will be no use setting it again
+                        continue;
                     }
 
-                    _lastChangeHandled = propertyReference;
                     binding.Invoke();
                 }
+
+                // we've finished handling this change
+                _changesBeingHandled.Pop();
             }
         }
 
@@ -93,7 +98,7 @@ namespace Torii.Binding
             if (bindingType == BindingType.TwoWay)
             {
                 DataBinding<TType> oppositeBinding = new DataBinding<TType>(bindee, binder, binderReference);
-                createBinding(bindeeReference, binding);
+                createBinding(bindeeReference, oppositeBinding);
 
             }
         }

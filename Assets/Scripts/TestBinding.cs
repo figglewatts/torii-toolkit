@@ -11,6 +11,35 @@ public class TestBinding : MonoBehaviour, IPropertyWatcher
 
     public Image HealthBar;
     public Text HealthBarText;
+    public Slider Slider1;
+    public Slider Slider2;
+    public Text Slider2Text;
+
+    public float Slider1Value
+    {
+        get { return Slider1.value; }
+        set
+        {
+            Slider1.value = value;
+            NotifyPropertyChange(nameof(Slider1Value));
+        }
+    }
+
+    public float Slider2Value
+    {
+        get { return Slider2.value; }
+        set
+        {
+            Slider2.value = value;
+            NotifyPropertyChange(nameof(Slider2Value));
+        }
+    }
+
+    public float Slider2TextText
+    {
+        get { return Slider2.value; }
+        set { Slider2Text.text = $"{Slider2.value}"; }
+    }
 
     public float HealthBarFillAmount
     {
@@ -24,7 +53,7 @@ public class TestBinding : MonoBehaviour, IPropertyWatcher
     public float HealthBarTextText
     {
         get { return _playerHealth; }
-        set { HealthBarText.text = value.ToString() + "%"; }
+        set { HealthBarText.text = $"{value}%"; }
     }
 
     private float _playerMaxHealth = 100;
@@ -55,11 +84,17 @@ public class TestBinding : MonoBehaviour, IPropertyWatcher
     {
         GUID = Guid.NewGuid();
 
+        Slider1.onValueChanged.AddListener((f) => {NotifyPropertyChange(nameof(Slider1Value));});
+        Slider2.onValueChanged.AddListener((f) => {NotifyPropertyChange(nameof(Slider2Value));});
+
         bindBroker = new BindBroker();
         bindBroker.RegisterData(this);
 
         bindBroker.Bind(() => PlayerHealth, () => HealthBarFillAmount, BindingType.OneWay);
         bindBroker.Bind(() => PlayerHealth, () => HealthBarTextText, BindingType.OneWay);
+
+        bindBroker.Bind(() => Slider1Value, () => Slider2Value, BindingType.TwoWay);
+        bindBroker.Bind(() => Slider2Value, () => Slider2TextText, BindingType.OneWay);
     }
 
     [ContextMenu("Damage")]
