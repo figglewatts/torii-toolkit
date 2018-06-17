@@ -8,6 +8,8 @@ namespace Torii.UI.Widgets
 {
     public class TUILabel : TUIGraphic
     {
+        // TODO: auto set size
+        
         public static TUILabel Create(string text, TUILabelSettings settings = null, LayoutElementData element = null)
         {
             TUILabel label = createBaseWidget<TUILabel>(element);
