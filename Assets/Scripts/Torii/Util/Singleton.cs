@@ -16,10 +16,7 @@ namespace Torii.Util
         /// <summary>
         /// Get the instance of this Singleton.
         /// </summary>
-        public static T Instance
-        {
-            get { return _instance ?? (_instance = new T()); }
-        }
+        public static T Instance => _instance ?? (_instance = new T());
 
         private Singleton()
         {

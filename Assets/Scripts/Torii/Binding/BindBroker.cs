@@ -68,7 +68,7 @@ namespace Torii.Binding
 
                     if (_changesBeingHandled.Contains(binding.TargetReference))
                     {
-                        // the target of this change is one that we've already handled,
+                        // the Target of this change is one that we've already handled,
                         // so it will be no use setting it again
                         continue;
                     }
