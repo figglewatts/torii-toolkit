@@ -6,6 +6,7 @@ using SimpleJSON;
 using Torii;
 using Torii.Binding;
 using Torii.Resource;
+using Torii.Serialization;
 using Torii.UI;
 using Torii.UI.Widgets;
 using Torii.Util;
@@ -20,6 +21,20 @@ public class TestScript : MonoBehaviour {
     
     void Awake()
     {
+        SerializationTest test = new SerializationTest()
+        {
+            Name = "Testing serialization!!",
+            Number = 3.141f
+        };
+        test.Strings.AddRange(new [] {"test 1", "test 2", "test 3"});
+
+        ToriiSerializer serializer = new ToriiSerializer();
+        //serializer.Serialize(test, "test.dat");
+
+        SerializationTest test2 = serializer.Deserialize<SerializationTest>("test2.dat");
+
+        Debug.Log(test2.Name);
+        Debug.Log(test2.Number);
     }
 
 	void Start ()
